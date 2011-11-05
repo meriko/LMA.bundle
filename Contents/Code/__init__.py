@@ -58,8 +58,11 @@ def MainMenu():
 #  spotlightURL = str(mainPage.xpath("//div[@id='spotlight']/a/@href")).strip("[]'")
 #  name = str(mainPage.xpath("//div[@id='spotlight']/a/text()")).strip("[]'")
 #  dir.Append(Function(DirectoryItem(concert, title="Spotlight Show", summary=name), page=spotlightURL, showName=name))
-  itunesURL = "http://" + Prefs['itunesIP'] + ":32400/music/iTunes/Artists"
-  itunesArtistsPage = XML.ElementFromURL(itunesURL, errors='ignore')
+  try:
+    itunesURL = "http://" + Prefs['itunesIP'] + ":32400/music/iTunes/Artists"
+    itunesArtistsPage = XML.ElementFromURL(itunesURL, errors='ignore')
+  except:
+    itunesArtistsPage = None
   if itunesArtistsPage != None:
     dir.Append(Function(DirectoryItem(itunes, title="Find Shows for Artists in my iTunes Library")))
 
