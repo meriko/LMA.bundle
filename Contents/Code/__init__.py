@@ -20,6 +20,8 @@
 import string
 import datetime
 
+LOSSLESS_CAPABLE = ['ClientPlatform.OSX', 'ClientPlatform.Windows']
+
 ###################################################################################################
 def Start():
   Plugin.AddPrefixHandler('/music/LMA', MainMenu, 'Live Music Archive', 'icon-default.png', 'art-default.jpg')
@@ -62,7 +64,7 @@ def MainMenu():
     itunesURL = "http://" + Prefs['itunesIP'] + ":32400/music/iTunes/Artists"
     itunesArtistsPage = XML.ElementFromURL(itunesURL, errors='ignore')
   except:
-    itunesArtistsPage = None
+    itunesArtistsPage = None  
   if itunesArtistsPage != None:
     dir.Append(Function(DirectoryItem(itunes, title="Find Shows for Artists in my iTunes Library")))
 
@@ -179,32 +181,34 @@ def concert(sender, page, showName):
     urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
     Log("found mp3s")
   
-  
-  #get flac16, shn
-  if Prefs['lossless'] == True:
-    media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='Flac']")
-    Log("looking for Flac")
-    if media_type != []:
-      i = len(media_type[0].xpath('preceding-sibling::*')) 
-      urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
-      Log("found Flacs")
-    elif media_type == []:
-      media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='Shorten']")
-      Log("looking for shorten")
+  if Client.Platform in LOSSLESS_CAPABLE:
+    #get flac16, shn
+    if Prefs['lossless'] == True:
+      media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='Flac']")
+      Log("looking for Flac")
       if media_type != []:
         i = len(media_type[0].xpath('preceding-sibling::*')) 
         urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
-        Log("found shn")
-
-  #Get FLAC24
-  if Prefs['flac24'] == True:
-    media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='24bit Flac']")
-    Log("looking for Flac24")
-    if media_type != []:
-      i = len(media_type[0].xpath('preceding-sibling::*')) 
-      urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
-      Log("found Flac24")
+        Log("found Flacs")
+      elif media_type == []:
+        media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='Shorten']")
+        Log("looking for shorten")
+        if media_type != []:
+          i = len(media_type[0].xpath('preceding-sibling::*')) 
+          urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
+          Log("found shn")
   
+    #Get FLAC24
+    if Prefs['flac24'] == True:
+      media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='24bit Flac']")
+      Log("looking for Flac24")
+      if media_type != []:
+        i = len(media_type[0].xpath('preceding-sibling::*')) 
+        urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
+        Log("found Flac24")
+  else:
+    #client is unable to play lossless formats
+    pass
   #get titles
   titles = page.xpath("//table[@id='ff2']//td[1]/text()")
   if titles != []:
