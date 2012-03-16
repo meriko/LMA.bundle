@@ -20,7 +20,7 @@
 import string
 import datetime
 
-LOSSLESS_CAPABLE = ['ClientPlatform.OSX', 'ClientPlatform.Windows']
+LOSSLESS_CAPABLE = [ClientPlatform.MacOSX, ClientPlatform.Windows]
 
 ###################################################################################################
 def Start():
@@ -180,7 +180,7 @@ def concert(sender, page, showName):
     i = len(media_type[0].xpath('preceding-sibling::*')) 
     urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
     Log("found mp3s")
-  
+
   if Client.Platform in LOSSLESS_CAPABLE:
     #get flac16, shn
     if Prefs['lossless'] == True:
