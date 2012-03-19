@@ -100,7 +100,7 @@ def artists(sender, letter=None):
     else:
       continue
     if letter=="#":
-      for n in string.digits:
+      for n in list(string.digits):
         if identifier[0] == n:
           pageURL= "http://www.archive.org/search.php?query=collection%3A" + identifier + "&sort=-date&page=1"
           dir.Append(Function(DirectoryItem(showList, title=name), pageURL=pageURL, title2=name, isArtistPage=True, identifier=identifier))
