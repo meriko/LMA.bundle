@@ -24,6 +24,7 @@ LOSSLESS_CAPABLE = [ClientPlatform.MacOSX, ClientPlatform.Windows]
 RECENT_SHOWS = "http://www.archive.org/search.php?query=collection%3Aetree%26sort%3D-%2Fmetadata%2Fpublicdate"
 MOST_DOWNLOADED = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-downloads"
 MOST_DOWNLOADED_WEEK = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-week"
+ARTISTS_URL = "http://www.archive.org/advancedsearch.php?q=mediatype%3Acollection+collection%3Aetree&fl[]=creator&fl[]=identifier&sort[]=identifier+asc&sort[]=&sort[]=&rows=50000&page=1&fmt=xml&xmlsearch=Search#raw"
 
 ###################################################################################################
 def Start():
@@ -72,10 +73,9 @@ def Letters():
 ##################################################################################################
 
 def Artists(letter=None):
-  dir = MediaContainer(title2="Artists-" + str(letter), viewGroup='List',)
+  oc = ObjectContatiner(title2="Artists-%s" % letter, view_group='List')
 
-  artistsURL = "http://www.archive.org/advancedsearch.php?q=mediatype%3Acollection+collection%3Aetree&fl[]=creator&fl[]=identifier&sort[]=identifier+asc&sort[]=&sort[]=&rows=50000&page=1&fmt=xml&xmlsearch=Search#raw"
-  artistsList = XML.ElementFromURL(artistsURL, errors='ignore',)
+  artistsList = XML.ElementFromURL(ARTISTS_URL, errors='ignore',)
   results = artistsList.xpath("/response//doc")
   for n in range(len(results)):
     identifier = artistsList.xpath("//doc[%i]/str[@name='identifier']/text()"  % (n+1))
@@ -92,13 +92,15 @@ def Artists(letter=None):
       for n in list(string.digits):
         if identifier[0] == n:
           pageURL= "http://www.archive.org/search.php?query=collection%3A" + identifier + "&sort=-date&page=1"
-          dir.Append(Function(DirectoryItem(showList, title=name), pageURL=pageURL, title2=name, isArtistPage=True, identifier=identifier))
+          oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=name, isArtistPage=True, identifier=identifier), title=name))
     else:
       if identifier[0] == letter:
         pageURL= "http://www.archive.org/search.php?query=collection%3A" + identifier + "&sort=-date&page=1"
-        dir.Append(Function(DirectoryItem(showList, title=name), pageURL=pageURL, title2=name, isArtistPage=True, identifier=identifier))
+        oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=name, isArtistPage=True, identifier=identifier), title=name))
 
-  return dir
+  return oc
+
+##################################################################################################
 
 def ShowList(sender, title2, pageURL=None, isArtistPage=False, identifier=None, query=None, thumbs=None):
   dir = MediaContainer(title2=title2, viewGroup='List')
