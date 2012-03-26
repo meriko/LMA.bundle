@@ -240,21 +240,6 @@ def Staff():
 
 ##################################################################################################
 
-def newArtists(sender):
-  # useless since most are empty
-  
-  dir = MediaContainer(title2="New Artists")
-  page = HTML.ElementFromURL("http://www.archive.org/search.php?query=mediatype%3Acollection%20collection%3Aetree&sort=-%2Fmetadata%2Faddeddate", errors="ignore")
-  names = page.xpath("//a[@class='titleLink']/text()")
-  urls = page.xpath("//a[@class='titleLink']/@href")
-  for name, url in zip(names, urls):
-    identifier = str(name).replace("/details/", "")
-    pageURL= "http://www.archive.org/search.php?query=collection%3A" + identifier + "&sort=-date&page=1"
-    dir.Append(Function(DirectoryItem(showList, title=str(name)), title2=str(name), pageURL=pageURL, isArtistPage=True))
-  
-  return dir
-
-
 def iTunes(sender):
 # fuzzy matching way way way way way too slow (estimate 15 minutes for my library), cant even verify it works. exact matches only till plex framework can do the matching
   
