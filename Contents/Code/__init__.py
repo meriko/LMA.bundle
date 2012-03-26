@@ -152,10 +152,11 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
     next = showsList.xpath("//a[text()='Next']/@href")
     if next != []:
       pageURL = "http://www.archive.org" + next[0]
-      dir.Append(Function(DirectoryItem(showList, title="Next 50 Results"), pageURL=pageURL, title2=title2))
+      oc.add(ObjectDirectory(key=Callback(ShowList, pageURL=pageURL, title2=title2), title="Next 50 Results"))
 
-  return dir
+  return oc
 
+##################################################################################################
 
 ### REFERENCES TO "Concert()" SHOULD BE REPLACED WITH "AlbumObject()"s POINTING TO THE URL SERVICE TO RETRIEVE "TrackObject()"s ###
 def Concert(sender, page, showName):
