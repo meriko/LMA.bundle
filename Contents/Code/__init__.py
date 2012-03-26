@@ -60,17 +60,18 @@ def MainMenu():
   return oc
 
 ##################################################################################################
-def Letters(sender):
-  dir = MediaContainer(title2="Artists", viewGroup='List')
-  dir.Append(Function(DirectoryItem(artists, title="#"), letter='#'))
+
+def Letters():
+  oc = ObjectContainer(title2="Artists", view_group='List')
+  oc.add(DirectoryObject(key=Callback(Artists, letter="#"), title="#"))
   for c in list(string.ascii_uppercase):
-    dir.Append(Function(DirectoryItem(artists, title=c,), letter=c))
+    oc.add(DirectoryObject(key=Callback(Artists, letter=c), title=c))
 
-  return dir
+  return oc
 
+##################################################################################################
 
-
-def artists(sender, letter=None):
+def Artists(letter=None):
   dir = MediaContainer(title2="Artists-" + str(letter), viewGroup='List',)
 
   artistsURL = "http://www.archive.org/advancedsearch.php?q=mediatype%3Acollection+collection%3Aetree&fl[]=creator&fl[]=identifier&sort[]=identifier+asc&sort[]=&sort[]=&rows=50000&page=1&fmt=xml&xmlsearch=Search#raw"
