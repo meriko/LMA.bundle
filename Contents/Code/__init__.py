@@ -102,8 +102,8 @@ def Artists(letter=None):
 
 ##################################################################################################
 
-def ShowList(sender, title2, pageURL=None, isArtistPage=False, identifier=None, query=None, thumbs=None):
-  dir = MediaContainer(title2=title2, viewGroup='List')
+def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=None, thumbs=None):
+  oc = MediaContainer(title2=title2, view_group='List')
   if thumbs == None:
     thumbs = R('icon-default.png')
   if query != None:
@@ -125,8 +125,8 @@ def ShowList(sender, title2, pageURL=None, isArtistPage=False, identifier=None, 
           years = yearsPage.xpath("//table[@id='browse']//ul//a/text()")
           yearURLs = yearsPage.xpath("//table[@id='browse']//ul//a/@href")
           for year, url in zip(years, yearURLs):
-            dir.Append(Function(DirectoryItem(showList, title=str(year), thumb=thumbs), title2=str(year), pageURL="http://www.archive.org" + url + "&sort=date",))
-          return dir
+            oc.add(DirectoryObject(key=Callback(ShowList, title2=str(year), pageURL="http://www.archive.org" + url + "&sort=date"), title=str(year), thumb=thumbs))
+          return oc
 
 
     showURLs = showsList.xpath("//a[@class='titleLink']/@href")
@@ -144,10 +144,10 @@ def ShowList(sender, title2, pageURL=None, isArtistPage=False, identifier=None, 
       # for artists in the search results
       if showsList.xpath("//a[@class='titleLink'][@href='%s']/parent::td/preceding-sibling::td/img[@alt='[collection]']" %url):
         pageURL= "http://www.archive.org/search.php?query=collection%3A" + url.replace("/details/","") + "&sort=-date&page=1"
-        dir.Append(Function(DirectoryItem(showList, title=title), pageURL=pageURL, title2=title, isArtistPage=True, identifier=url.replace("/details/","")))
+        oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=title, isArtistPage=True, identifier=url.replace("/details/","")), title=title))
 
       else:
-        dir.Append(Function(DirectoryItem(concert, title=str(title), thumb=thumbs), page=str(url), showName=str(title)))
+        oc.add(DirectoryObject(key=Callback(Concert, page=str(url), showName=str(title)), title=str(title), thumb=thumbs))
 
     next = showsList.xpath("//a[text()='Next']/@href")
     if next != []:
@@ -157,8 +157,8 @@ def ShowList(sender, title2, pageURL=None, isArtistPage=False, identifier=None, 
   return dir
 
 
-
-def concert(sender, page, showName):
+### REFERENCES TO "Concert()" SHOULD BE REPLACED WITH "AlbumObject()"s POINTING TO THE URL SERVICE TO RETRIEVE "TrackObject()"s ###
+def Concert(sender, page, showName):
   dir = MediaContainer(title2=showName)
   page = HTML.ElementFromURL("http://www.archive.org" + page, errors="ignore")
   artist = str(page.xpath("//div[3]/a[3]/text()")).strip("[]'")
