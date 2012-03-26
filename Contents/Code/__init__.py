@@ -147,6 +147,7 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
         oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=title, isArtistPage=True, identifier=url.replace("/details/","")), title=title))
 
       else:
+        ### REFERENCES TO "Concert()" SHOULD BE REPLACED WITH "AlbumObject()"s POINTING TO THE URL SERVICE TO RETRIEVE "TrackObject()"s ###
         oc.add(DirectoryObject(key=Callback(Concert, page=str(url), showName=str(title)), title=str(title), thumb=thumbs))
 
     next = showsList.xpath("//a[text()='Next']/@href")
@@ -224,17 +225,20 @@ def Concert(sender, page, showName):
     except: Log('nothing found')
   return dir
 
+##################################################################################################
 # staff picks top level menu
-def Staff(sender):
-  dir = MediaContainer(title2="Staff Picks")
+def Staff():
+  oc = ObjectContainer(title2="Staff Picks")
   page = HTML.ElementFromURL("http://www.archive.org/details/etree", errors="ignore")
   titles = page.xpath("//div[@id='picks']//a//text()")
   urls = page.xpath("//div[@id='picks']//a//@href")
   for url, title in zip(urls, titles):
-    dir.Append(Function(DirectoryItem(concert, title=str(title)), page=str(url), showName=str(title)))
+    ### REFERENCES TO "Concert()" SHOULD BE REPLACED WITH "AlbumObject()"s POINTING TO THE URL SERVICE TO RETRIEVE "TrackObject()"s ###
+    oc.add(ObjectDirectory(key=Callback(Concert), page=str(url), showName=str(title)), title=str(title))
 
-  return dir
+  return oc
 
+##################################################################################################
 
 def newArtists(sender):
   # useless since most are empty
