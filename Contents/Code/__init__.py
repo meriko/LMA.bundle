@@ -20,7 +20,6 @@
 import string
 import datetime
 
-LOSSLESS_CAPABLE = [ClientPlatform.MacOSX, ClientPlatform.Windows]
 RECENT_SHOWS = "http://www.archive.org/search.php?query=collection%3Aetree%26sort%3D-%2Fmetadata%2Fpublicdate"
 MOST_DOWNLOADED = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-downloads"
 MOST_DOWNLOADED_WEEK = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-week"
@@ -167,62 +166,17 @@ def Concert(sender, page, showName):
   album = str(page.xpath("//span[text()='Date:']/following-sibling::*[1]/text()")).strip("[]'")
   urls = []
   
-  #get mp3s
-  media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='VBR MP3']")
-  if media_type != []:
-    i = len(media_type[0].xpath('preceding-sibling::*')) 
-    urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
-    Log("found mp3s")
-
-  if Client.Platform in LOSSLESS_CAPABLE:
-    #get flac16, shn
-    if Prefs['lossless'] == True:
-      media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='Flac']")
-      Log("looking for Flac")
-      if media_type != []:
-        i = len(media_type[0].xpath('preceding-sibling::*')) 
-        urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
-        Log("found Flacs")
-      elif media_type == []:
-        media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='Shorten']")
-        Log("looking for shorten")
-        if media_type != []:
-          i = len(media_type[0].xpath('preceding-sibling::*')) 
-          urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
-          Log("found shn")
-  
-    #Get FLAC24
-    if Prefs['flac24'] == True:
-      media_type = page.xpath("//table[@id='ff2']//tr[1]//td[text()='24bit Flac']")
-      Log("looking for Flac24")
-      if media_type != []:
-        i = len(media_type[0].xpath('preceding-sibling::*')) 
-        urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
-        Log("found Flac24")
-  else:
-    #client is unable to play lossless formats
-    pass
-  #get titles
-  titles = page.xpath("//table[@id='ff2']//td[1]/text()")
-  if titles != []:
-    del titles[0]
-  
-  #append tracks
-  if urls != []:
-    for url, title in zip(urls, titles):
-      dir.Append(TrackItem("http://www.archive.org" + url, title=title.strip(), artist=artist, album=album, thumb=R('icon-default.png')))
-  
   # m3u stream fallback for grateful dead soundboards
-  else:
-    try:
-      m3u = page.xpath("//a[text()='VBR M3U']/@href")[0]
-      if m3u[0] is not 'h': m3u = 'http://www.archive.org/' + m3u
-      m3u = HTTP.Request(m3u).content.strip().splitlines()
-      Log('using m3u')
-      for url in m3u:
-        dir.Append(TrackItem(url, title="Track %i" % (m3u.index(url)+1), artist=artist, album=album, thumb=R('icon-default.png')))
+  try:
+    m3u = page.xpath("//a[text()='VBR M3U']/@href")[0]
+    if m3u[0] is not 'h': m3u = 'http://www.archive.org/' + m3u
+    m3u = HTTP.Request(m3u).content.strip().splitlines()
+    Log('using m3u')
+    for url in m3u:
+      dir.Append(TrackItem(url, title="Track %i" % (m3u.index(url)+1), artist=artist, album=album, thumb=R('icon-default.png')))
         
-    except: Log('nothing found')
+  except: Log('nothing found')
+  
   return dir
 
 ##################################################################################################
