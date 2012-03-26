@@ -21,58 +21,46 @@ import string
 import datetime
 
 LOSSLESS_CAPABLE = [ClientPlatform.MacOSX, ClientPlatform.Windows]
+RECENT_SHOWS = "http://www.archive.org/search.php?query=collection%3Aetree%26sort%3D-%2Fmetadata%2Fpublicdate"
+MOST_DOWNLOADED = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-downloads"
+MOST_DOWNLOADED_WEEK = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-week"
 
 ###################################################################################################
 def Start():
   Plugin.AddPrefixHandler('/music/LMA', MainMenu, 'Live Music Archive', 'icon-default.png', 'art-default.jpg')
   Plugin.AddViewGroup("InfoList", viewMode="InfoList", mediaType="items")
   Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
-  MediaContainer.title1 = 'Live Music Archive'
-  MediaContainer.content = 'Items'
-  MediaContainer.art = R('art-default.jpg')
-  DirectoryItem.thumb=R('icon-default.png')
-  InputDirectoryItem.thumb=R('icon-default.png')
+  ObjectContainer.title1 = 'Live Music Archive'
+  ObjectContainer.content = 'Items'
+  ObjectContainer.art = R('art-default.jpg')
+  DirectoryObject.thumb=R('icon-default.png')
   HTTP.CacheTime = CACHE_1HOUR
 
 ###################################################################################################
 
 def MainMenu():
-  dir = MediaContainer(viewGroup='List')
-#  mainPage = HTML.ElementFromURL("http://www.archive.org/details/etree", errors="ignore")
-  dir.Append(Function(DirectoryItem(letters, title="Browse Archive by Artist")))
-  dir.Append(Function(InputDirectoryItem(showList, title="Seach the Live Music Archive", prompt="Search..."), title2="Search Results"))
-  now = datetime.datetime.now()
-  month = str(now.month)
-  day = str(now.day)
-  if now.month < 10:
-    month = '0' + month
-  if now.day < 10:
-    day = '0' + day
-  todayURL = "http://www.archive.org/search.php?query=collection:etree%20AND%20%28date:19??-"+month+"-"+day+"%20OR%20date:20??-"+month+"-"+day+"%29&sort=-/metadata/date"
-  dir.Append(Function(DirectoryItem(showList, title='Shows This Day in History'), title2="This Day in History", pageURL=todayURL))
-
-  dir.Append(Function(DirectoryItem(showList, title="Most Recently Added Shows"), title2="Recently Added Shows", pageURL="http://www.archive.org/search.php?query=collection%3Aetree&sort=-%2Fmetadata%2Fpublicdate"))
-#  dir.Append(Function(DirectoryItem(newArtists, title="Recently Added Artists",))) # useless since most are empty
-  dir.Append(Function(DirectoryItem(showList, title="Most Downloaded Shows"), title2="Most Downloaded", pageURL="http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-downloads"))
-  dir.Append(Function(DirectoryItem(showList, title="Most Downloaded Shows Last Week"), title2="Last Week", pageURL="http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-week"))
-  dir.Append(Function(DirectoryItem(staff, title="Staff Picks")))
-
-#  spotlightURL = str(mainPage.xpath("//div[@id='spotlight']/a/@href")).strip("[]'")
-#  name = str(mainPage.xpath("//div[@id='spotlight']/a/text()")).strip("[]'")
-#  dir.Append(Function(DirectoryItem(concert, title="Spotlight Show", summary=name), page=spotlightURL, showName=name))
-  try:
-    itunesURL = "http://" + Prefs['itunesIP'] + ":32400/music/iTunes/Artists"
-    itunesArtistsPage = XML.ElementFromURL(itunesURL, errors='ignore')
-  except:
-    itunesArtistsPage = None  
-  if itunesArtistsPage != None:
-    dir.Append(Function(DirectoryItem(itunes, title="Find Shows for Artists in my iTunes Library")))
-
-  dir.Append(PrefsItem("Preferences...", thumb=S('Gear.png')))
-  return dir  
+  oc = ObjectContainer(view_group='List')
+  oc.add(DirectoryObject(key=Callback(Letters), title="Browse Archive by Artist"))
+  '''TODO >>> write a LMA Search Service'''
+  #dir.Append(Function(InputDirectoryItem(showList, title="Seach the Live Music Archive", prompt="Search..."), title2="Search Results"))
+  
+  oc.add(DirectoryObject(key=Callback(ShowList, title2="This Day in History", pageURL=Callback(TodayURL())), title="Shows This Day in History"))
+  oc.add(DirectoryObject(key=Callback(ShowList, title2="Recently Added Shows", pageURL=RECENT_SHOWS), title="Most Recently Added Shows"))
+  oc.add(DirectoryObject(key=Callback(ShowList, title2="Most Downloaded", pageURL=MOST_DOWNLOADED), title="Most Downloaded Shows"))
+  oc.add(DirectoryObject(key=Callback(ShowList, title2="Last Week", pageURL=MOST_DOWNLOADED_WEEK), title="Most Downloaded Shows Last Week"))
+  oc.add(DirectoryObject(key=Callback(Staff), title="Staff Picks"))
+  
+  if itunesPage() != None:
+    oc.add(ObjectDirectory(key=Callback(iTunes), title="Find Shows for Artists in my iTunes Library"))
+    oc.add(PrefsObject("Preferences...",
+           summary="No PMS instance with a valid iTunes library at this address (default: localhost)\n Please enter the IP address of a PMS instance sharing an iTunes library.",
+           thumb=S('Gear.png')))
+  else:
+    oc.add(PrefsObject("Preferences...", thumb=S('Gear.png')))
+  return oc
 
 ##################################################################################################
-def letters(sender):
+def Letters(sender):
   dir = MediaContainer(title2="Artists", viewGroup='List')
   dir.Append(Function(DirectoryItem(artists, title="#"), letter='#'))
   for c in list(string.ascii_uppercase):
@@ -111,7 +99,7 @@ def artists(sender, letter=None):
 
   return dir
 
-def showList(sender, title2, pageURL=None, isArtistPage=False, identifier=None, query=None, thumbs=None):
+def ShowList(sender, title2, pageURL=None, isArtistPage=False, identifier=None, query=None, thumbs=None):
   dir = MediaContainer(title2=title2, viewGroup='List')
   if thumbs == None:
     thumbs = R('icon-default.png')
@@ -233,7 +221,7 @@ def concert(sender, page, showName):
   return dir
 
 # staff picks top level menu
-def staff(sender):
+def Staff(sender):
   dir = MediaContainer(title2="Staff Picks")
   page = HTML.ElementFromURL("http://www.archive.org/details/etree", errors="ignore")
   titles = page.xpath("//div[@id='picks']//a//text()")
@@ -259,7 +247,7 @@ def newArtists(sender):
   return dir
 
 
-def itunes(sender):
+def iTunes(sender):
 # fuzzy matching way way way way way too slow (estimate 15 minutes for my library), cant even verify it works. exact matches only till plex framework can do the matching
   
   dir = MediaContainer(title2="iTunes")
@@ -303,4 +291,21 @@ def itunes(sender):
     
   return dir
 
+def TodayURL():
+  now = datetime.datetime.now()
+  month = str(now.month)
+  day = str(now.day)
+  if now.month < 10:
+    month = '0' + month
+  if now.day < 10:
+    day = '0' + day
+  today_URL = "http://www.archive.org/search.php?query=collection:etree%20AND%20%28date:19??-"+month+"-"+day+"%20OR%20date:20??-"+month+"-"+day+"%29&sort=-/metadata/date"
+  return today_URL
 
+def iTunesPage():
+  try:
+    itunesURL = "http://" + Prefs['itunesIP'] + ":32400/music/iTunes/Artists"
+    itunesArtistsPage = XML.ElementFromURL(itunesURL, errors='ignore')
+  except:
+    itunesArtistsPage = None
+  return itunesArtistsPage
