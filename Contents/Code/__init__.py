@@ -240,14 +240,12 @@ def Staff():
 
 ##################################################################################################
 
-def iTunes(sender):
+def iTunes():
 # fuzzy matching way way way way way too slow (estimate 15 minutes for my library), cant even verify it works. exact matches only till plex framework can do the matching
   
-  dir = MediaContainer(title2="iTunes")
-  itunesURL = "http://" + Prefs['itunesIP'] + ":32400/music/iTunes/Artists"
-  itunesArtistsPage = XML.ElementFromURL(itunesURL, errors='ignore')
-  if itunesArtistsPage == None:
-    return MessageContainer(header="No Itunes Found",  message="no pms instance with a valid itunes library at this address\n(default: localhost) Plese go the the plugin's prefrences and set \nthe ip address of a pms instance sharing an itunes library")
+  oc = ObjectContainer(title2="iTunes")
+
+  itunesArtistsPage = itunesPage()
   itunesArtists = itunesArtistsPage.xpath('//Artist/@artist')
   itunesThumbs = itunesArtistsPage.xpath('//Artist/@thumb')
   
@@ -280,9 +278,11 @@ def iTunes(sender):
         pageURL= "http://www.archive.org/search.php?query=collection%3A" + identifier + "&sort=-date&page=1"
         thumb = "http://" + Prefs['itunesIP'] + ":32400" +  itunesDict[strippedLMAname]
         
-        dir.Append(Function(DirectoryItem(showList, title=LMAname, thumb = thumb), pageURL=pageURL, title2=LMAname, isArtistPage=True, identifier=identifier, thumbs=thumb))
+        oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=LMAname, isArtistPage=True, identifier=identifier, thumbs=thumb), title=LMAname, thumb=thumb))
     
-  return dir
+  return oc
+
+##################################################################################################
 
 def TodayURL():
   now = datetime.datetime.now()
@@ -294,6 +294,8 @@ def TodayURL():
     day = '0' + day
   today_URL = "http://www.archive.org/search.php?query=collection:etree%20AND%20%28date:19??-"+month+"-"+day+"%20OR%20date:20??-"+month+"-"+day+"%29&sort=-/metadata/date"
   return today_URL
+
+##################################################################################################
 
 def iTunesPage():
   try:
