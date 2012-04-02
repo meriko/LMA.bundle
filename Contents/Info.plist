@@ -18,7 +18,9 @@
 	<string>1.0</string>
 	<key>PlexAudioCodec</key>
 	<array>
+		<string>FLAC</string>
 		<string>MP3</string>
+		<string>VORBIS</string>
 	</array>
 	<key>PlexClientPlatforms</key>
 	<string>*</string>
@@ -28,5 +30,13 @@
 	<string>AlwaysOn</string>
 	<key>PlexPluginCodePolicy</key>
 	<string>Elevated</string>
+	<key>PlexSearchServices</key>
+	<dict>
+	    <key>LMA</key>
+	    <dict>
+		<key>Identifier</key>
+		<string>com.plexapp.plugins.LMA</string>
+	    </dict>
+	</dict>
 </dict>
 </plist>
