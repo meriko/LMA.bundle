@@ -20,12 +20,14 @@
 	<array>
 		<string>MP3</string>
 	</array>
+	<key>PlexClientPlatforms</key>
+	<string>MacOSX,iOS,Android,LGTV</string>
 	<key>PlexFrameworkVersion</key>
 	<string>2</string>
+	<key>PlexPluginConsoleLogging</key>
+	<string>1</string>
 	<key>PlexPluginMode</key>
 	<string>AlwaysOn</string>
-	<key>PlexClientPlatforms</key>
-	<string>*</string>
 	<key>PlexPluginCodePolicy</key>
 	<string>Elevated</string>
 </dict>

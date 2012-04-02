@@ -20,7 +20,7 @@
 import string
 import datetime
 
-LOSSLESS_CAPABLE = [ClientPlatform.MacOSX, ClientPlatform.Windows]
+LOSSLESS_CAPABLE = ['ClientPlatform.OSX', 'ClientPlatform.Windows']
 
 ###################################################################################################
 def Start():
@@ -40,7 +40,7 @@ def MainMenu():
   dir = MediaContainer(viewGroup='List')
 #  mainPage = HTML.ElementFromURL("http://www.archive.org/details/etree", errors="ignore")
   dir.Append(Function(DirectoryItem(letters, title="Browse Archive by Artist")))
-  dir.Append(Function(InputDirectoryItem(showList, title="Search the Live Music Archive", prompt="Search..."), title2="Search Results"))
+  dir.Append(Function(InputDirectoryItem(showList, title="Seach the Live Music Archive", prompt="Search..."), title2="Search Results"))
   now = datetime.datetime.now()
   month = str(now.month)
   day = str(now.day)
@@ -100,7 +100,7 @@ def artists(sender, letter=None):
     else:
       continue
     if letter=="#":
-      for n in list(string.digits):
+      for n in string.digits:
         if identifier[0] == n:
           pageURL= "http://www.archive.org/search.php?query=collection%3A" + identifier + "&sort=-date&page=1"
           dir.Append(Function(DirectoryItem(showList, title=name), pageURL=pageURL, title2=name, isArtistPage=True, identifier=identifier))
@@ -180,7 +180,7 @@ def concert(sender, page, showName):
     i = len(media_type[0].xpath('preceding-sibling::*')) 
     urls = page.xpath("//table[@id='ff2']//tr/td[%i]/a/@href" % (i+1))
     Log("found mp3s")
-
+  
   if Client.Platform in LOSSLESS_CAPABLE:
     #get flac16, shn
     if Prefs['lossless'] == True:
