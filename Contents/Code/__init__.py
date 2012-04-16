@@ -173,7 +173,7 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
       pageURL = "http://www.archive.org" + next[0]
       oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=title2, artist=artist), title="Next 50 Results"))
       
-  if len(oc) == '0':
+  if len(oc) == 0:
     return ObjectContainer(header='Live Music Archive', message='No shows listed.')
 
   return oc
