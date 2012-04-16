@@ -45,7 +45,8 @@ def Start():
 def MainMenu():
   oc = ObjectContainer(view_group='List')
   oc.add(DirectoryObject(key=Callback(Letters), title="Browse Archive by Artist"))
-  oc.add(SearchDirectoryObject(identifier="com.plexapp.plugins.LMA", title="Search the Live Music Archive", prompt="Search for...", thumb=R('icon-default.png')))
+  '''include a default query for the benefit of the plugin tester'''
+  oc.add(SearchDirectoryObject(identifier="com.plexapp.plugins.LMA", query='dog', title="Search the Live Music Archive", prompt="Search for...", thumb=R('icon-default.png')))
   todayURL = TodayURL()
   oc.add(DirectoryObject(key=Callback(ShowList, title2="This Day in History", pageURL=todayURL), title="Shows This Day in History"))
   oc.add(DirectoryObject(key=Callback(ShowList, title2="Recently Added Shows", pageURL=RECENT_SHOWS), title="Most Recently Added Shows"))
@@ -173,7 +174,7 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
       pageURL = "http://www.archive.org" + next[0]
       oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=title2, artist=artist), title="Next 50 Results"))
       
-  if len(oc) == '0':
+  if len(oc) == 0:
     return ObjectContainer(header='Live Music Archive', message='No shows listed.')
 
   return oc
