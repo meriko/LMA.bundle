@@ -23,7 +23,7 @@ import datetime
 RECENT_SHOWS = "http://archive.org/search.php?query=collection%3Aetree&sort=-publicdate"
 MOST_DOWNLOADED = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-downloads"
 MOST_DOWNLOADED_WEEK = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-week"
-ARTISTS_URL = "http://www.archive.org/advancedsearch.php?q=mediatype:Acollection+collection:etree%s&fl[]=creator&fl[]=identifier&sort[]=identifier+asc&sort[]=&sort[]=&rows=50000&page=1&fmt=xml&xmlsearch=Search#raw"
+ARTISTS_URL = ["http://www.archive.org/advancedsearch.php?q=mediatype%3Acollection+collection%3Aetree", "&fl[]=creator&fl[]=identifier&sort[]=identifier+asc&sort[]=&sort[]=&rows=50000&page=1&fmt=xml&xmlsearch=Search#raw"]
 BASE_URL = "http://archive.org"
 
 ###################################################################################################
@@ -78,10 +78,11 @@ def Artists(letter=None):
   oc = ObjectContainer(title2="Artists-%s" % letter, view_group='List')
   l = str(letter)
   if l == "#":
-     lq = "+identifier:(0*+OR+1*+OR+2*+OR+3*+OR+4*+OR+5*OR+6*+OR+7*+OR+8*+OR+9*)"
+     lq = "+identifier:(0%2A+OR+1%2A+OR+2%2A+OR+3%2A+OR+4%2A+OR+5%2A+OR+6%2A+OR+7%2A+OR+8%2A+OR+9%2A)"
   else:
-     lq = "+identifier:(%s*+OR+%s*)" % (letter.lower(), letter.upper())  
-  artistsList = XML.ElementFromURL(ARTISTS_URL % lq, errors='ignore',)
+     lq = "+identifier:(" + letter.upper() + "%2A+OR+" + letter.lower() + "%2A)"
+  artistsURL = ARTISTS_URL[0] + lq + ARTISTS_URL[1]
+  artistsList = XML.ElementFromURL(artistsURL, errors='ignore')
   results = artistsList.xpath("/response//doc")
   for n in range(len(results)):
     identifier = artistsList.xpath("//doc[%i]/str[@name='identifier']/text()"  % (n+1))
@@ -97,11 +98,11 @@ def Artists(letter=None):
     if letter=="#":
       for n in list(string.digits):
         if identifier[0] == n:
-          pageURL= "http://www.archive.org/search.php?query=collection:%s&sort=-date&page=1" % identifier
+          pageURL= "http://www.archive.org/search.php?query=collection%3A" + identifier + "&sort=-date&page=1"
           oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=name, isArtistPage=True, identifier=identifier), title=name))
     else:
       if identifier[0] == letter:
-        pageURL= "http://www.archive.org/search.php?query=collection:%s&sort=-date&page=1" & identifier
+        pageURL= "http://www.archive.org/search.php?query=collection%3A" + identifier + "&sort=-date&page=1"
         oc.add(DirectoryObject(key=Callback(ShowList, title2=name, pageURL=pageURL, isArtistPage=True, identifier=identifier, artist=name), title=name))
 
   return oc
@@ -149,7 +150,7 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
       title = ''.join(y)
       titles.append(title)
       
-      x = showsList.xpath("//table[@class='resultsTable']//tr[%i]//td[@class='hitCell']/text()" % (i+1))[1]
+      x = showsList.xpath("//table[@class='resultsTable']//tr[%i]//td[@class='hitCell']/text()" % (i+1))
       # the +1 is because python list indexes start from 0 and indexes in xpath start at 1
       summary = ''.join(x)
       summaries.append(summary)
