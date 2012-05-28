@@ -23,7 +23,7 @@ import datetime
 RECENT_SHOWS = "http://archive.org/search.php?query=collection%3Aetree&sort=-publicdate"
 MOST_DOWNLOADED = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-downloads"
 MOST_DOWNLOADED_WEEK = "http://www.archive.org/search.php?query=%28%28collection%3Aetree%20OR%20mediatype%3Aetree%29%20AND%20NOT%20collection%3AGratefulDead%29%20AND%20-mediatype%3Acollection&sort=-week"
-ARTISTS_URL = "http://www.archive.org/advancedsearch.php?q=mediatype%3Acollection+collection%3Aetree&fl[]=creator&fl[]=identifier&sort[]=identifier+asc&sort[]=&sort[]=&rows=50000&page=1&fmt=xml&xmlsearch=Search#raw"
+ARTISTS_URL = ["http://www.archive.org/advancedsearch.php?q=mediatype%3Acollection+collection%3Aetree", "&fl[]=creator&fl[]=identifier&sort[]=identifier+asc&sort[]=&sort[]=&rows=50000&page=1&fmt=xml&xmlsearch=Search#raw"]
 BASE_URL = "http://archive.org"
 
 ###################################################################################################
@@ -45,7 +45,6 @@ def Start():
 def MainMenu():
   oc = ObjectContainer(view_group='List')
   oc.add(DirectoryObject(key=Callback(Letters), title="Browse Archive by Artist"))
-  '''include a default query for the benefit of the plugin tester'''
   oc.add(SearchDirectoryObject(identifier="com.plexapp.plugins.LMA", title="Search the Live Music Archive", prompt="Search for...", thumb=R('icon-default.png')))
   todayURL = TodayURL()
   oc.add(DirectoryObject(key=Callback(ShowList, title2="This Day in History", pageURL=todayURL), title="Shows This Day in History"))
@@ -77,7 +76,13 @@ def Letters():
 
 def Artists(letter=None):
   oc = ObjectContainer(title2="Artists-%s" % letter, view_group='List')
-  artistsList = XML.ElementFromURL(ARTISTS_URL, errors='ignore',)
+  l = str(letter)
+  if l == "#":
+     lq = "+identifier:(0%2A+OR+1%2A+OR+2%2A+OR+3%2A+OR+4%2A+OR+5%2A+OR+6%2A+OR+7%2A+OR+8%2A+OR+9%2A)"
+  else:
+     lq = "+identifier:(" + letter.upper() + "%2A+OR+" + letter.lower() + "%2A)"
+  artistsURL = ARTISTS_URL[0] + lq + ARTISTS_URL[1]
+  artistsList = XML.ElementFromURL(artistsURL, errors='ignore')
   results = artistsList.xpath("/response//doc")
   for n in range(len(results)):
     identifier = artistsList.xpath("//doc[%i]/str[@name='identifier']/text()"  % (n+1))
@@ -110,7 +115,7 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
     thumbs = R('icon-default.png')
   if query != None:
     query = String.URLEncode(query)
-    pageURL="http://www.archive.org/search.php?query="+query+"%20AND%20collection%3Aetree"
+    pageURL="http://www.archive.org/search.php?query=%s+AND+collection:etree" % identifier
   
   
   showsList = HTML.ElementFromURL(pageURL, errors='ignore')
@@ -125,11 +130,11 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
         numShows = int(numShows[0].replace(",",""))
         if numShows >= 51:
           # get the years list
-          yearsPage = HTML.ElementFromURL("http://www.archive.org/browse.php?collection=" + identifier + "&field=year", errors="ignore")
+          yearsPage = HTML.ElementFromURL("http://www.archive.org/browse.php?collection=%s&field=year" % identifier, errors="ignore")
           years = yearsPage.xpath("//table[@id='browse']//ul//a/text()")
           yearURLs = yearsPage.xpath("//table[@id='browse']//ul//a/@href")
           for year, url in zip(years, yearURLs):
-            oc.add(DirectoryObject(key=Callback(ShowList, title2=str(year), pageURL="http://www.archive.org" + url + "&sort=date", artist=artist), title=str(year), thumb=thumbs))
+            oc.add(DirectoryObject(key=Callback(ShowList, title2=str(year), pageURL="http://www.archive.org%s&sort=date" % url, artist=artist), title=str(year), thumb=thumbs))
           return oc
 
 
@@ -145,7 +150,7 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
       title = ''.join(y)
       titles.append(title)
       
-      x = showsList.xpath("//table[@class='resultsTable']//tr[%i]//td[@class='hitCell']/text()" % (i+1))[1]
+      x = showsList.xpath("//table[@class='resultsTable']//tr[%i]//td[@class='hitCell']/text()" % (i+1))
       # the +1 is because python list indexes start from 0 and indexes in xpath start at 1
       summary = ''.join(x)
       summaries.append(summary)
@@ -161,7 +166,7 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
     for url, title, summary, rating in zip(showURLs, titles, summaries, ratings):
       # for artists in the search results
       if showsList.xpath("//a[@class='titleLink'][@href='%s']/parent::td/preceding-sibling::td/img[@alt='[collection]']" %url):
-        pageURL= "http://www.archive.org/search.php?query=collection%3A" + url.replace("/details/","") + "&sort=-date&page=1"
+        pageURL= "http://www.archive.org/search.php?query=collection:%s&sort=-date&page=1" % url.replace("/details/","")
         oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=title, isArtistPage=True, identifier=url.replace("/details/",""), artist=artist),
           title=title))
 
@@ -234,7 +239,7 @@ def iTunes():
     
     
     if strippedLMAname in itunesDict:
-        pageURL= "http://www.archive.org/search.php?query=collection%3A" + identifier + "&sort=-date&page=1"
+        pageURL= "http://www.archive.org/search.php?query=collection:%s&sort=-date&page=1" % identifier
         thumb = "http://" + Prefs['itunesIP'] + ":32400" +  itunesDict[strippedLMAname]
         
         oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=LMAname, isArtistPage=True, identifier=identifier, thumbs=thumb), title=LMAname, thumb=thumb))
@@ -251,7 +256,7 @@ def TodayURL():
     month = '0' + month
   if now.day < 10:
     day = '0' + day
-  today_URL = "http://www.archive.org/search.php?query=collection:etree%20AND%20%28date:19??-"+month+"-"+day+"%20OR%20date:20??-"+month+"-"+day+"%29&sort=-/metadata/date"
+  today_URL = "http://www.archive.org/search.php?query=collection:etree+AND+(date:19??-%s-%s+OR+date:20??-%s-%s)&sort=-/metadata/date" % (month, day, month, day)
   return today_URL
 
 ##################################################################################################
