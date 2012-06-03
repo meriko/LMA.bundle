@@ -54,7 +54,7 @@ def MainMenu():
   oc.add(DirectoryObject(key=Callback(Staff), title="Staff Picks"))
   
   if iTunesPage() != None:
-    oc.add(ObjectDirectory(key=Callback(iTunes), title="Find Shows for Artists in my iTunes Library"))
+    oc.add(DirectoryObject(key=Callback(iTunes), title="Find Shows for Artists in my iTunes Library"))
     oc.add(PrefsObject("Preferences...",
            summary="No PMS instance with a valid iTunes library at this address (default: localhost)\n Please enter the IP address of a PMS instance sharing an iTunes library.",
            thumb=S('Gear.png')))
