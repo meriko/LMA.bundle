@@ -16,5 +16,9 @@
 	<string>2</string>
 	<key>PlexPluginCodePolicy</key>
 	<string>Elevated</string>
+	<key>PlexPluginTesterFlags</key>
+	<array>
+		<string>NoURLServices</string>
+	</array>
 </dict>
 </plist>
