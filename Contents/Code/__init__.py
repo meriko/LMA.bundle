@@ -92,7 +92,7 @@ def Artists(letter=None):
     else:
       continue
     if name != []:
-      name = str(name[0])
+      name = unicode(name[0])
     else:
       continue
     if letter=="#":
