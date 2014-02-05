@@ -3,7 +3,7 @@ SEARCH_PARAMS = '(collection:"etree" AND (%s AND collection:etree)) AND mediatyp
 
 def Search(query):
   
-  oc = ObjectContainer(title2='Search Results', art=R('art-default.jpg'))
+  oc = ObjectContainer(title2='Search Results')
   
   params = String.Quote(SEARCH_PARAMS % query, usePlus=False)
   showsList = HTML.ElementFromURL(SEARCH_URL % params)
