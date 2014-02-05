@@ -4,12 +4,6 @@
 <dict>
 	<key>CFBundleIdentifier</key>
 	<string>com.plexapp.plugins.LMA</string>
-	<key>PlexAudioCodec</key>
-	<array>
-		<string>FLAC</string>
-		<string>MP3</string>
-		<string>VORBIS</string>
-	</array>
 	<key>PlexClientPlatforms</key>
 	<string>*</string>
 	<key>PlexFrameworkVersion</key>
