@@ -209,18 +209,18 @@ def iTunes():
   
   oc = ObjectContainer(title2="iTunes")
 
-  itunesArtistsPage = itunesPage()
-  itunesArtists = itunesArtistsPage.xpath('//Artist/@artist')
-  itunesThumbs = itunesArtistsPage.xpath('//Artist/@thumb')
+  iTunesArtistsPage = iTunesPage()
+  iTunesArtists = iTunesArtistsPage.xpath('//Artist/@artist')
+  iTunesThumbs = iTunesArtistsPage.xpath('//Artist/@thumb')
   
   LMAartistsURL = "http://www.archive.org/advancedsearch.php?q=mediatype%3Acollection+collection%3Aetree&fl[]=creator&fl[]=identifier&sort[]=identifier+asc&sort[]=&sort[]=&rows=50000&page=1&fmt=xml&xmlsearch=Search#raw"
   LMAartistsList = XML.ElementFromURL(LMAartistsURL, errors='ignore',)
   results = LMAartistsList.xpath("/response//doc")
   
-  itunesDict = {}
-  for itunesArtist, itunesThumb in zip(itunesArtists, itunesThumbs):
-    itunesArtist = str(itunesArtist).lower().replace(" and ", "").replace("the ", "").replace(" ", "").translate(string.maketrans("",""), string.punctuation)
-    itunesDict[itunesArtist] = itunesThumb
+  iTunesDict = {}
+  for iTunesArtist, iTunesThumb in zip(iTunesArtists, iTunesThumbs):
+    iTunesArtist = str(iTunesArtist).lower().replace(" and ", "").replace("the ", "").replace(" ", "").translate(string.maketrans("",""), string.punctuation)
+    iTunesDict[iTunesArtist] = iTunesThumb
   
   for n in range(len(results)):
     identifier = LMAartistsList.xpath("//doc[%i]/str[@name='identifier']/text()"  % (n+1))
@@ -238,9 +238,9 @@ def iTunes():
     strippedLMAname = LMAname.lower().replace(" and ", "").replace("the ", "").replace(" ", "").translate(string.maketrans("",""), string.punctuation)
     
     
-    if strippedLMAname in itunesDict:
+    if strippedLMAname in iTunesDict:
         pageURL= "http://www.archive.org/search.php?query=collection:%s&sort=-date&page=1" % identifier
-        thumb = "http://" + Prefs['itunesIP'] + ":32400" +  itunesDict[strippedLMAname]
+        thumb = "http://" + Prefs['itunesIP'] + ":32400" +  iTunesDict[strippedLMAname]
         
         oc.add(DirectoryObject(key=Callback(ShowList, pageURL=pageURL, title2=LMAname, isArtistPage=True, identifier=identifier, thumbs=thumb), title=LMAname, thumb=thumb))
     
@@ -263,8 +263,8 @@ def TodayURL():
 
 def iTunesPage():
   try:
-    itunesURL = "http://" + Prefs['itunesIP'] + ":32400/music/iTunes/Artists"
-    itunesArtistsPage = XML.ElementFromURL(itunesURL, errors='ignore')
+    iTunesURL = "http://" + Prefs['itunesIP'] + ":32400/music/iTunes/Artists"
+    iTunesArtistsPage = XML.ElementFromURL(iTunesURL, errors='ignore')
   except:
-    itunesArtistsPage = None
-  return itunesArtistsPage
+    iTunesArtistsPage = None
+  return iTunesArtistsPage
