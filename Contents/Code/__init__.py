@@ -28,16 +28,16 @@ BASE_URL = "http://archive.org"
 
 ###################################################################################################
 def Start():
-  Plugin.AddPrefixHandler('/music/LMA', MainMenu, 'Live Music Archive', 'icon-default.png', 'art-default.jpg')
+  Plugin.AddPrefixHandler('/music/LMA', MainMenu, 'Live Music Archive', 'icon-default.jpg', 'art-default.jpg')
   Plugin.AddViewGroup("InfoList", viewMode="InfoList", mediaType="items")
   Plugin.AddViewGroup("List", viewMode="List", mediaType="items")
   ObjectContainer.title1 = 'Live Music Archive'
   ObjectContainer.content = 'Items'
   ObjectContainer.art = R('art-default.jpg')
-  DirectoryObject.thumb = R('icon-default.png')
-  AlbumObject.thumb = R('icon-default.png')
+  DirectoryObject.thumb = R('icon-default.jpg')
+  AlbumObject.thumb = R('icon-default.jpg')
   #AlbumObject.art = R('art-default.jpg')
-  TrackObject.thumb = R('icon-default.png')
+  TrackObject.thumb = R('icon-default.jpg')
   HTTP.CacheTime = CACHE_1HOUR
 
 ###################################################################################################
@@ -45,7 +45,7 @@ def Start():
 def MainMenu():
   oc = ObjectContainer(view_group='List')
   oc.add(DirectoryObject(key=Callback(Letters), title="Browse Archive by Artist"))
-  oc.add(SearchDirectoryObject(identifier="com.plexapp.plugins.LMA", title="Search the Live Music Archive", prompt="Search for...", thumb=R('icon-default.png')))
+  oc.add(SearchDirectoryObject(identifier="com.plexapp.plugins.LMA", title="Search the Live Music Archive", prompt="Search for...", thumb=R('icon-default.jpg')))
   todayURL = TodayURL()
   oc.add(DirectoryObject(key=Callback(ShowList, title2="This Day in History", pageURL=todayURL), title="Shows This Day in History"))
   oc.add(DirectoryObject(key=Callback(ShowList, title2="Recently Added Shows", pageURL=RECENT_SHOWS), title="Most Recently Added Shows"))
@@ -112,7 +112,7 @@ def Artists(letter=None):
 def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=None, thumbs=None, artist=None):
   oc = ObjectContainer(title2=title2, view_group='InfoList')
   if thumbs == None:
-    thumbs = R('icon-default.png')
+    thumbs = R('icon-default.jpg')
   if query != None:
     query = String.URLEncode(query)
     pageURL="http://www.archive.org/search.php?query=%s+AND+collection:etree" % identifier
@@ -198,7 +198,7 @@ def Staff():
   for pick in picks:
     title = pick.text
     url = BASE_URL + pick.get('href')
-    oc.add(AlbumObject(url=url, title=title, thumb=R('icon-default.png')))
+    oc.add(AlbumObject(url=url, title=title, thumb=R('icon-default.jpg')))
 
   return oc
 
