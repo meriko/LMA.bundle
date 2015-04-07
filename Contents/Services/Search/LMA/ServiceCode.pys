@@ -35,6 +35,6 @@ def Search(query):
       
   for url, title, summary, rating in zip(showURLs, titles, summaries, ratings):
       concertURL = "http://www.archive.org" + url
-      oc.add(AlbumObject(url=concertURL,  title=str(title), summary=summary, rating=rating, thumb=R('icon-default.jpg')))
+      oc.add(Album(url=concertURL,  title=str(title), summary=summary, rating=rating, thumb=R('icon-default.jpg')))
     
   return  oc
