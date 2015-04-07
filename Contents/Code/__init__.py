@@ -35,8 +35,8 @@ def Start():
   ObjectContainer.content = 'Items'
   ObjectContainer.art = R('art-default.jpg')
   DirectoryObject.thumb = R('icon-default.jpg')
-  AlbumObject.thumb = R('icon-default.jpg')
-  #AlbumObject.art = R('art-default.jpg')
+  Album.thumb = R('icon-default.jpg')
+  #Album.art = R('art-default.jpg')
   TrackObject.thumb = R('icon-default.jpg')
   HTTP.CacheTime = CACHE_1HOUR
 
@@ -172,7 +172,7 @@ def ShowList(title2, pageURL=None, isArtistPage=False, identifier=None, query=No
 
       else:
         concertURL = ConcertURL(url)
-        oc.add(AlbumObject(url=concertURL,  title=str(title), summary=summary, rating=rating, artist=artist))
+        oc.add(Album(url=concertURL,  title=str(title), summary=summary, rating=rating, artist=artist))
 
     next = showsList.xpath("//a[text()='Next']/@href")
     if next != []:
@@ -198,7 +198,7 @@ def Staff():
   for pick in picks:
     title = pick.text
     url = BASE_URL + pick.get('href')
-    oc.add(AlbumObject(url=url, title=title, thumb=R('icon-default.jpg')))
+    oc.add(Album(url=url, title=title, thumb=R('icon-default.jpg')))
 
   return oc
 
